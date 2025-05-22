@@ -23,5 +23,3 @@ def predict():
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)[len(SYSTEM_PROMPT):].strip()
     return jsonify({"response": response})
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
