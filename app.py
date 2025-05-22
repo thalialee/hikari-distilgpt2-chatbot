@@ -1,13 +1,8 @@
-# app.py
 from flask import Flask, request, jsonify
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 app = Flask(__name__)
-
-@app.route("/", methods=["GET"])
-def index():
-    return "Hikari chatbot server is running. Use POST /predict to chat."
 
 tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
 model = AutoModelForCausalLM.from_pretrained("distilgpt2")
@@ -18,6 +13,10 @@ SYSTEM_PROMPT = (
     "The user says: "
 )
 
+@app.route("/", methods=["GET"])
+def index():
+    return "Hikari chatbot server is running. Use POST /predict to chat."
+
 @app.route("/predict", methods=["POST"])
 def predict():
     user_input = request.json.get("message", "")
@@ -27,3 +26,4 @@ def predict():
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)[len(SYSTEM_PROMPT):].strip()
     return jsonify({"response": response})
 
+# No app.run() needed – Gunicorn will serve the app
