@@ -22,16 +22,21 @@ def index():
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    print("Received POST to /predict")  # Debug
     user_input = request.json.get("message", "")
+    print("User input:", user_input)  # Debug
     prompt = SYSTEM_PROMPT + user_input
     inputs = tokenizer(prompt, return_tensors="pt", padding=True)
+    print("Tokenized input")  # Debug
     outputs = model.generate(
         input_ids=inputs["input_ids"],
         attention_mask=inputs["attention_mask"],
         max_length=50,  # Keep this low to reduce memory and response time
         pad_token_id=tokenizer.eos_token_id
     )
+    print("Model generated output")  # Debug
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)[len(SYSTEM_PROMPT):].strip()
+    print("Decoded response:", response)  # Debug
     return jsonify({"response": response})
 
 # No app.run() needed; Gunicorn will serve the app
