@@ -5,6 +5,10 @@ import torch
 
 app = Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def index():
+    return "Hikari chatbot server is running. Use POST /predict to chat."
+
 tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
 model = AutoModelForCausalLM.from_pretrained("distilgpt2")
 
