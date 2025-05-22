@@ -7,6 +7,9 @@ app = Flask(__name__)
 tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
 model = AutoModelForCausalLM.from_pretrained("distilgpt2")
 
+# Set pad token to eos token to avoid warning
+tokenizer.pad_token = tokenizer.eos_token
+
 SYSTEM_PROMPT = (
     "You are Hikari, a supportive, empathetic mental health companion. "
     "Respond with warmth, validation, and practical mindfulness suggestions. "
@@ -21,9 +24,14 @@ def index():
 def predict():
     user_input = request.json.get("message", "")
     prompt = SYSTEM_PROMPT + user_input
-    inputs = tokenizer.encode(prompt, return_tensors="pt")
-    outputs = model.generate(inputs, max_length=150, pad_token_id=tokenizer.eos_token_id)
+    inputs = tokenizer(prompt, return_tensors="pt", padding=True)
+    outputs = model.generate(
+        input_ids=inputs["input_ids"],
+        attention_mask=inputs["attention_mask"],
+        max_length=150,
+        pad_token_id=tokenizer.eos_token_id
+    )
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)[len(SYSTEM_PROMPT):].strip()
     return jsonify({"response": response})
 
-# No app.run() needed – Gunicorn will serve the app
+# No app.run() needed
